@@ -13,6 +13,11 @@ use App\Http\Controllers\Api\ProductController;
 
 use App\Models\Shop;
 
+use App\Http\Controllers\Api\PaymentController;
+
+Route::post('/payment', [PaymentController::class, 'createTransaction']);
+Route::post('/midtrans/callback', [PaymentController::class, 'callback']);
+
 Route::get('/shops', function () {
     return Shop::with('user')->get();
 });
