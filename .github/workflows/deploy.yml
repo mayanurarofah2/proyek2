@@ -113,6 +113,7 @@ jobs:
             docker pull ghcr.io/${{ github.repository }}:latest
 
             # Update container tanpa downtime besar
+            docker compose down || true
             docker compose up -d --remove-orphans
 
             # Tunggu container siap
