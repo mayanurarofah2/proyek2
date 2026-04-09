@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Midtrans\Config;
 use Midtrans\Snap;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 
 class PaymentController extends Controller
 {
@@ -19,22 +21,76 @@ class PaymentController extends Controller
     }
 
     // 🔥 CREATE TRANSACTION
-    public function createTransaction(Request $request)
+public function createTransaction(Request $request)
 {
     try {
-        $orderNumber = 'ORDER-' . time();
 
-        $order = Order::create([
-            'order_number' => $orderNumber,
-            'total' => (int) $request->total,
-            'status' => 'pending',
-            'user_id' => $request->user_id
-        ]);
+        if (!$request->items || count($request->items) == 0) {
+            return response()->json(['error' => 'Items kosong'], 400);
+        }
 
+        $orders = [];
+        $grossAmount = 0;
+
+        // 🔥 KELOMPOKKAN BERDASARKAN PENJUAL
+        $grouped = [];
+
+        foreach ($request->items as $item) {
+            $product = Product::find($item['product_id']);
+
+            if (!$product) continue;
+
+            $sellerId = $product->user_id;
+
+            if (!isset($grouped[$sellerId])) {
+                $grouped[$sellerId] = [];
+            }
+
+            $grouped[$sellerId][] = [
+                'product' => $product,
+                'quantity' => $item['quantity'] ?? 1,
+                'price' => $item['price'] ?? 0
+            ];
+        }
+
+        // 🔥 BUAT ORDER PER PENJUAL
+        foreach ($grouped as $sellerId => $items) {
+
+            $orderNumber = 'ORDER-' . time() . '-' . $sellerId;
+
+            $total = 0;
+
+            foreach ($items as $item) {
+                $total += $item['price'] * $item['quantity'];
+            }
+
+            // 🔥 SIMPAN ORDER
+            $order = Order::create([
+                'order_number' => $orderNumber,
+                'total' => $total,
+                'status' => 'pending',
+                'user_id' => $sellerId
+            ]);
+
+            // 🔥 SIMPAN ITEMS
+            foreach ($items as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product']->id,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                ]);
+            }
+
+            $orders[] = $order;
+            $grossAmount += $total;
+        }
+
+        // 🔥 MIDTRANS (SATU PAYMENT UNTUK SEMUA ORDER)
         $params = [
             'transaction_details' => [
-                'order_id' => $orderNumber,
-                'gross_amount' => (int) $request->total,
+                'order_id' => 'MULTI-' . time(),
+                'gross_amount' => (int) $grossAmount,
             ],
             'customer_details' => [
                 'first_name' => $request->name ?? 'User',
@@ -42,25 +98,24 @@ class PaymentController extends Controller
             ],
         ];
 
-        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        $snapToken = Snap::getSnapToken($params);
 
         return response()->json([
             'snap_token' => $snapToken,
-            'order_number' => $orderNumber
+            'total' => $grossAmount
         ]);
 
     } catch (\Exception $e) {
+
         return response()->json([
             'error' => $e->getMessage()
         ], 500);
     }
 }
 
-    // 🔥 CALLBACK
+    // 🔥 CALLBACK MIDTRANS
     public function callback(Request $request)
     {
-        
-
         $order = Order::where('order_number', $request->order_id)->first();
 
         if (!$order) {
@@ -68,11 +123,11 @@ class PaymentController extends Controller
         }
 
         if ($request->transaction_status == 'settlement') {
-            $order->status = 'paid';
+            $order->status = 'sukses';
         } elseif ($request->transaction_status == 'pending') {
             $order->status = 'pending';
         } else {
-            $order->status = 'failed';
+            $order->status = 'gagal';
         }
 
         $order->save();

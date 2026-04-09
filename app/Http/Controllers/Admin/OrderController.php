@@ -26,6 +26,18 @@ class OrderController extends Controller
         $order->status = $request->status;
         $order->save();
 
+// 🔥 TAMBAHAN
+    if ($request->status == 'sukses') {
+        return redirect('/admin/orders/detail/' . $order->id);
+    }
+
         return redirect()->back()->with('success', 'Status pesanan berhasil diupdate');
+    }
+        // 🔥 INI YANG KAMU TANYA (WAJIB TARUH DI SINI)
+    public function show($id)
+    {
+        $order = Order::with(['user', 'items.product'])->findOrFail($id);
+
+        return view('admin.orders.detail', compact('order'));
     }
 }

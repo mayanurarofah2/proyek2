@@ -15,6 +15,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/biodata', [ShopController::class, 'create'])->name('shop.create');
     Route::post('/biodata', [ShopController::class, 'store'])->name('shop.store');
 });
+Route::get('/admin/orders/detail/{id}', [OrderController::class, 'show']);
+
 
 Route::get('/', function () {
     return view('welcome');
