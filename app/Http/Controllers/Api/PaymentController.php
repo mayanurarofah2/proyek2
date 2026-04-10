@@ -32,12 +32,10 @@ public function createTransaction(Request $request)
         $orders = [];
         $grossAmount = 0;
 
-        // 🔥 KELOMPOKKAN BERDASARKAN PENJUAL
         $grouped = [];
 
         foreach ($request->items as $item) {
             $product = Product::find($item['product_id']);
-
             if (!$product) continue;
 
             $sellerId = $product->user_id;
@@ -53,10 +51,10 @@ public function createTransaction(Request $request)
             ];
         }
 
-        // 🔥 BUAT ORDER PER PENJUAL
-        foreach ($grouped as $sellerId => $items) {
+        // 🔥 ORDER ID UTAMA (INI YANG DIPAKAI MIDTRANS)
+        $mainOrderId = 'MULTI-' . time();
 
-            $orderNumber = 'ORDER-' . time() . '-' . $sellerId;
+        foreach ($grouped as $sellerId => $items) {
 
             $total = 0;
 
@@ -64,15 +62,15 @@ public function createTransaction(Request $request)
                 $total += $item['price'] * $item['quantity'];
             }
 
-            // 🔥 SIMPAN ORDER
             $order = Order::create([
-                'order_number' => $orderNumber,
+                'order_number' => $mainOrderId, // 🔥 SAMAKAN
                 'total' => $total,
                 'status' => 'pending',
-                'user_id' => $sellerId
+                'user_id' => $sellerId,
+                'phone' => $request->phone,
+                'address' => $request->address,
             ]);
 
-            // 🔥 SIMPAN ITEMS
             foreach ($items as $item) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -82,14 +80,13 @@ public function createTransaction(Request $request)
                 ]);
             }
 
-            $orders[] = $order;
             $grossAmount += $total;
         }
 
-        // 🔥 MIDTRANS (SATU PAYMENT UNTUK SEMUA ORDER)
+        // 🔥 MIDTRANS PARAM
         $params = [
             'transaction_details' => [
-                'order_id' => 'MULTI-' . time(),
+                'order_id' => $mainOrderId,
                 'gross_amount' => (int) $grossAmount,
             ],
             'customer_details' => [
@@ -98,14 +95,18 @@ public function createTransaction(Request $request)
             ],
         ];
 
+        // 🔥 DEBUG
+        \Log::info("MIDTRANS PARAM:", $params);
+
         $snapToken = Snap::getSnapToken($params);
 
         return response()->json([
             'snap_token' => $snapToken,
-            'total' => $grossAmount
         ]);
 
     } catch (\Exception $e) {
+
+        \Log::error("MIDTRANS ERROR: " . $e->getMessage());
 
         return response()->json([
             'error' => $e->getMessage()
@@ -114,14 +115,15 @@ public function createTransaction(Request $request)
 }
 
     // 🔥 CALLBACK MIDTRANS
-    public function callback(Request $request)
-    {
-        $order = Order::where('order_number', $request->order_id)->first();
+public function callback(Request $request)
+{
+    $orders = Order::where('order_number', $request->order_id)->get();
 
-        if (!$order) {
-            return response()->json(['message' => 'Order not found']);
-        }
+    if ($orders->isEmpty()) {
+        return response()->json(['message' => 'Order not found']);
+    }
 
+    foreach ($orders as $order) {
         if ($request->transaction_status == 'settlement') {
             $order->status = 'sukses';
         } elseif ($request->transaction_status == 'pending') {
@@ -131,7 +133,8 @@ public function createTransaction(Request $request)
         }
 
         $order->save();
-
-        return response()->json(['message' => 'OK']);
     }
+
+    return response()->json(['message' => 'OK']);
+}
 }
