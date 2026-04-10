@@ -116,6 +116,7 @@ jobs:
             
             docker rm -f laravel_app || true
             docker compose down || true
+            docker rm -f laravel_db || true 
             docker compose up -d --remove-orphans
 
             # Tunggu container siap
