@@ -11,22 +11,33 @@ class Order extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'user_id',        // penjual
-        'order_number',
-        'total',
-        'status'
-    ];
+protected $fillable = [
+    'user_id',     // 🔥 pembeli
+    'seller_id',   // 🔥 penjual
+    'order_number',
+    'total',
+    'status',
+    'phone',
+    'address'
+];
 
-    // relasi ke penjual
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+// 🔥 PEMBELI
+public function buyer()
+{
+    return $this->belongsTo(User::class, 'user_id');
+}
 
-    // relasi ke item order
-    public function items()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
+// 🔥 PENJUAL
+public function seller()
+{
+    return $this->belongsTo(User::class, 'seller_id');
+}
+
+// 🔥 ITEMS
+public function items()
+{
+    return $this->hasMany(OrderItem::class);
+}
+
+
 }

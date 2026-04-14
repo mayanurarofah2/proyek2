@@ -66,7 +66,8 @@ public function createTransaction(Request $request)
                 'order_number' => $mainOrderId, // 🔥 SAMAKAN
                 'total' => $total,
                 'status' => 'pending',
-                'user_id' => $sellerId,
+                'user_id' => $request->user_id, // 🔥 INI PEMBELI
+                'seller_id' => $sellerId,       // 🔥 TAMBAHAN
                 'phone' => $request->phone,
                 'address' => $request->address,
             ]);

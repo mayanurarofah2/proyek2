@@ -36,7 +36,7 @@ class OrderController extends Controller
         // 🔥 INI YANG KAMU TANYA (WAJIB TARUH DI SINI)
     public function show($id)
     {
-        $order = Order::with(['user', 'items.product'])->findOrFail($id);
+        $order = Order::with(['buyer', 'items.product'])->findOrFail($id);
 
         return view('admin.orders.detail', compact('order'));
     }
