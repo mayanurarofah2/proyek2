@@ -65,7 +65,11 @@ Route::post('/login', function (Request $request) {
 
 });
 Route::get('/orders/{user_id}', function ($user_id) {
-    return \App\Models\Order::with(['items.product', 'seller.shop'])
-        ->where('user_id', $user_id) // pembeli
-        ->get();
+    return \App\Models\Order::with([
+        'items.product',
+        'seller',          // 🔥 ambil user penjual
+        'seller.shop'      // 🔥 ambil toko penjual
+    ])
+    ->where('user_id', $user_id)
+    ->get();
 });

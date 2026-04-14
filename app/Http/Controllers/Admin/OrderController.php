@@ -12,9 +12,9 @@ class OrderController extends Controller
     {
         $user = auth()->user();
 
-        $orders = Order::where('user_id', $user->id)
-                    ->latest()
-                    ->get();
+        $orders = Order::where('seller_id', $user->id)
+            ->latest()
+            ->get();
 
         return view('admin.orders', compact('orders'));
     }
@@ -34,10 +34,14 @@ class OrderController extends Controller
         return redirect()->back()->with('success', 'Status pesanan berhasil diupdate');
     }
         // 🔥 INI YANG KAMU TANYA (WAJIB TARUH DI SINI)
-    public function show($id)
-    {
-        $order = Order::with(['buyer', 'items.product'])->findOrFail($id);
+   public function show($id)
+{
+    $user = auth()->user();
 
-        return view('admin.orders.detail', compact('order'));
-    }
+    $order = Order::with(['buyer', 'seller', 'items.product'])
+        ->where('seller_id', $user->id) // 🔥 PENTING BANGET
+        ->findOrFail($id);
+
+    return view('admin.orders.detail', compact('order'));
+}
 }
