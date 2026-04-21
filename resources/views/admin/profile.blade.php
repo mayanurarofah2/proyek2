@@ -69,13 +69,45 @@ background:#ff5c00;
 
 <body>
 
-<div class="container mt-5" style="max-width:900px">
+<div class="container mt-3 mt-md-5" style="max-width:900px">
+
+<!-- ✅ TOP MENU (HP ONLY) -->
+<div class="d-md-none bg-white shadow-sm p-3 mb-3 rounded">
+
+    <h5 class="text-warning fw-bold mb-2">FluffyBake</h5>
+
+    <div class="d-flex gap-3 overflow-auto small">
+
+        <a href="{{ route('admin.dashboard') }}" class="text-dark text-decoration-none">
+            Dashboard
+        </a>
+
+        <a href="{{ route('admin.products') }}" class="text-dark text-decoration-none">
+            Produk
+        </a>
+
+        <a href="{{ route('orders.index') }}" class="text-dark text-decoration-none">
+            Pesanan
+        </a>
+
+        <a href="{{ route('admin.transactions') }}" class="text-dark text-decoration-none">
+            Transaksi
+        </a>
+
+        <a href="{{ route('shop.profile') }}" class="text-warning fw-bold text-decoration-none">
+            Profil
+        </a>
+
+    </div>
+
+</div>
+
 
 <div class="profile-card">
 
 <div class="banner"></div>
 
-<div class="text-center">
+<div class="text-center px-3">
 
 @if($shop->photo)
 <img src="/uploads/{{ $shop->photo }}" class="logo">
@@ -84,52 +116,44 @@ background:#ff5c00;
 @endif
 
 <h4 class="mt-2">{{ $shop->store_name }}</h4>
-<p class="text-muted">{{ auth()->user()->email }}</p>
+<p class="text-muted small">{{ auth()->user()->email }}</p>
 
 </div>
 
 <hr>
 
-<!-- Statistik Toko -->
+<!-- Statistik -->
+<div class="row text-center px-3 px-md-4 mb-4 g-3">
 
-<div class="row text-center px-4 mb-4">
-
-<div class="col-md-4">
-
+<div class="col-12 col-md-4">
 <div class="stat-card">
 Produk
 <div class="stat-number">{{ auth()->user()->products()->count() }}</div>
 </div>
-
 </div>
 
-<div class="col-md-4">
-
+<div class="col-12 col-md-4">
 <div class="stat-card">
 Pesanan
 <div class="stat-number">{{ auth()->user()->orders()->count() }}</div>
 </div>
-
 </div>
 
-<div class="col-md-4">
-
+<div class="col-12 col-md-4">
 <div class="stat-card">
 Pendapatan
 <div class="stat-number">
 Rp {{ number_format(auth()->user()->orders()->sum('total')) }}
 </div>
 </div>
-
 </div>
 
 </div>
 
 <hr>
 
-<!-- Form Edit Profil -->
-
-<div class="p-4">
+<!-- Form -->
+<div class="p-3 p-md-4">
 
 <h5 class="mb-3">Edit Profil Toko</h5>
 
@@ -167,7 +191,7 @@ class="form-control">
 
 <div class="text-end">
 
-<button class="btn btn-update">
+<button class="btn btn-update w-100 w-md-auto">
 Update Profil
 </button>
 

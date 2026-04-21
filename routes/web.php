@@ -69,4 +69,10 @@ Route::get('/admin/orders', [OrderController::class, 'index'])->name('orders.ind
 Route::post('/admin/orders/update/{id}', [OrderController::class, 'update'])->name('orders.update');
 });
 
+Route::get('/admin/laporan/export', [DashboardController::class, 'export'])
+    ->name('laporan.export');
+
+Route::get('/admin/kwitansi/{id}', [TransactionController::class, 'cetak'])
+    ->name('kwitansi.cetak');
+
 require __DIR__.'/auth.php';

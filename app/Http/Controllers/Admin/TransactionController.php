@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionController extends Controller
 {
@@ -22,4 +23,16 @@ class TransactionController extends Controller
             'average'
         ));
     }
+
+    public function cetak($id)
+{
+    $order = Order::with(['items.product', 'buyer', 'seller'])
+        ->findOrFail($id);
+
+    $pdf = Pdf::loadView('admin.kwitansi_pdf', [
+        'order' => $order
+    ]);
+
+    return $pdf->download('kwitansi-'.$order->order_number.'.pdf');
+}
 }
