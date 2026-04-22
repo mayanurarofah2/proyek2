@@ -72,4 +72,5 @@ Route::get('/orders/{user_id}', function ($user_id) {
     ])
     ->where('user_id', $user_id)
     ->get();
+    
 });
