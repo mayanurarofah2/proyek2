@@ -30,6 +30,11 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
 
+
+    //ditambah ini
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->name('dashboard');
+
     Route::get('/admin', [DashboardController::class, 'index'])
         ->name('admin.dashboard');
 
