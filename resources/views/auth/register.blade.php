@@ -44,7 +44,7 @@
                    name="email"
                    value="{{ old('email') }}"
                    required
-                   class="w-full bg-[#d8cfc2] p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+                   class="w-full bg-[#D8CCBB] p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
                    placeholder="Masukan email">
             @error('email')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
