@@ -28,7 +28,7 @@
                    value="{{ old('email') }}"
                    required
                    autofocus
-                   class="w-full bg-[#d8cfc2] p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
+                   class="w-full bg-[#DACDBC] p-4 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-400"
                    placeholder="Masukan Email">
             @error('email')
                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
