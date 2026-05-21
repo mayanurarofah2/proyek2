@@ -129,4 +129,8 @@ jobs:
             # Jalankan migrasi database
             docker compose exec -T app php artisan migrate --force --no-interaction
 
+            # permission folder
+            chmod go+w -R products/
+            chmod go+w -R uploads/
+            
             echo "✅ Deployment selesai!"
